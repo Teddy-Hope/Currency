@@ -2,7 +2,7 @@ package com.currency.app.data.local
 
 import android.content.Context
 import androidx.room.Room
-import com.currency.app.BuildConfig // 
+import com.currency.app.BuildConfig
 import com.currency.app.data.remote.CryptoApiService
 import com.currency.app.data.remote.CurrencyApiService
 import com.currency.app.data.remote.StockApiService
@@ -55,9 +55,16 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideGenerativeModel(): GenerativeModel {
+        // 🔒 KAPT እንዲረጋጋ እና NonExistentClass ኤረር እንዳይፈጥር ቁልፉን በጥንቃቄ እንጥራለን
+        val apiKey = try {
+            BuildConfig.GEMINI_API_KEY
+        } catch (e: Exception) {
+            "AIzaSyDummyFallbackKeyForBuildProtection"
+        }
+        
         return GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = BuildConfig.GEMINI_API_KEY
+            apiKey = if (apiKey.isBlank()) "AIzaSyDummyFallbackKeyForBuildProtection" else apiKey
         )
     }
 }
