@@ -1,6 +1,6 @@
 package com.currency.app.data.remote
 
-import com.currency.app.BuildConfig // 
+import com.currency.app.BuildConfig
 import retrofit2.http.GET
 import retrofit2.http.Path
 

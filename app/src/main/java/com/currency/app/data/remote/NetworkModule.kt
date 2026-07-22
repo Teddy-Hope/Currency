@@ -29,36 +29,33 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideCryptoApiService(okHttpClient: OkHttpClient): CryptoApiService {
         return Retrofit.Builder()
-            .baseUrl("https://api.coingecko.com/") 
+            .baseUrl("https://api.coingecko.com/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+            .create(CryptoApiService::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideCryptoApiService(retrofit: Retrofit): CryptoApiService {
-        return retrofit.create(CryptoApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideStockApiService(retrofit: Retrofit): StockApiService {
-        // 🚀 የ IEX Sandboxን ሰብረን ወደ እውነተኛው የቀጥታ የፋይናንስ ሰርቨር (Finnhub Production Engine) መለወጫ መስመር
-        return retrofit.newBuilder()
+    fun provideStockApiService(okHttpClient: OkHttpClient): StockApiService {
+        return Retrofit.Builder()
             .baseUrl("https://finnhub.io/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(StockApiService::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideCurrencyApiService(retrofit: Retrofit): CurrencyApiService {
-        // 🚀 የምንዛሬውን ቤዝ ዩአርኤል ወደ እውነተኛው የ v6 ፍሰት ማስተካከያ
-        return retrofit.newBuilder()
+    fun provideCurrencyApiService(okHttpClient: OkHttpClient): CurrencyApiService {
+        return Retrofit.Builder()
             .baseUrl("https://v6.exchangerate-api.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(CurrencyApiService::class.java)
     }
