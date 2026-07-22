@@ -24,15 +24,20 @@ android {
             useSupportLibrary = true
         }
 
-        // 🔒 የጀሚኒ ሚስጥራዊ ቁልፍ ማንበቢያ
+        // 🔒 ከ local.properties የኤፒአይ ቁልፎችን በአስተማማኝ ሁኔታ ማንበቢያ
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localPropertiesFile.inputStream().use { localProperties.load(it) }
         }
+
         val geminiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
-        
+        val exchangeKey = localProperties.getProperty("EXCHANGE_API_KEY") ?: ""
+        val finnhubKey = localProperties.getProperty("FINNHUB_API_KEY") ?: ""
+
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
+        buildConfigField("String", "EXCHANGE_API_KEY", "\"$exchangeKey\"")
+        buildConfigField("String", "FINNHUB_API_KEY", "\"$finnhubKey\"")
     }
 
     buildTypes {
