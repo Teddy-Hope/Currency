@@ -55,16 +55,10 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideGenerativeModel(): GenerativeModel {
-        // 🔒 KAPT እንዲረጋጋ እና NonExistentClass ኤረር እንዳይፈጥር ቁልፉን በጥንቃቄ እንጥራለን
-        val apiKey = try {
-            BuildConfig.GEMINI_API_KEY
-        } catch (e: Exception) {
-            "AIzaSyDummyFallbackKeyForBuildProtection"
-        }
-        
+        // 🚀 እውነተኛውን የጂሚኒ ቁልፍ በቀጥታ ከ BuildConfig እንወስዳለን (ዜሮ ዴሞ/ውሸት የለም)
         return GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = if (apiKey.isBlank()) "AIzaSyDummyFallbackKeyForBuildProtection" else apiKey
+            apiKey = BuildConfig.GEMINI_API_KEY
         )
     }
 }
