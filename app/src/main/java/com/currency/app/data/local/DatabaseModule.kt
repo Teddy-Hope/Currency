@@ -11,7 +11,7 @@ import com.currency.app.domain.repository.FinancialRepository
 import com.google.ai.client.generativeai.GenerativeModel
 import dagger.Module
 import dagger.Provides
-import dagger.InstallIn
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -55,7 +55,6 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideGenerativeModel(): GenerativeModel {
-        // 🚀 እውነተኛውን የጂሚኒ ቁልፍ በቀጥታ ከ BuildConfig እንወስዳለን (ዜሮ ዴሞ/ውሸት የለም)
         return GenerativeModel(
             modelName = "gemini-1.5-flash",
             apiKey = BuildConfig.GEMINI_API_KEY
