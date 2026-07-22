@@ -34,10 +34,15 @@ class ChatViewModel @Inject constructor(
         _isLoading.value = true
 
         viewModelScope.launch {
-            // Execute the Gemini UseCase
-            val aiResponse = getFinancialAdviceUseCase.execute(text)
-            _messages.add(ChatMessage(text = aiResponse, isUser = false))
-            _isLoading.value = false
+            try {
+                // Execute the Gemini UseCase
+                val aiResponse = getFinancialAdviceUseCase.execute(text)
+                _messages.add(ChatMessage(text = aiResponse, isUser = false))
+            } catch (e: Exception) {
+                _messages.add(ChatMessage(text = "Error: ${e.localizedMessage ?: "Something went wrong"}", isUser = false))
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 }
