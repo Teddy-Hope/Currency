@@ -24,16 +24,17 @@ android {
             useSupportLibrary = true
         }
 
-        // 🔒 ከ local.properties የኤፒአይ ቁልፎችን በአስተማማኝ ሁኔታ ማንበቢያ
+        //  local.properties or Environment (GitHub Secrets)  to read
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localPropertiesFile.inputStream().use { localProperties.load(it) }
         }
 
-        val geminiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
-        val exchangeKey = localProperties.getProperty("EXCHANGE_API_KEY") ?: ""
-        val finnhubKey = localProperties.getProperty("FINNHUB_API_KEY") ?: ""
+        // local.properties or  GitHub Secrets (Environment variables) extract
+        val geminiKey = localProperties.getProperty("GEMINI_API_KEY") ?: System.getenv("GEMINI_API_KEY") ?: ""
+        val exchangeKey = localProperties.getProperty("EXCHANGE_API_KEY") ?: System.getenv("EXCHANGE_API_KEY") ?: ""
+        val finnhubKey = localProperties.getProperty("FINNHUB_API_KEY") ?: System.getenv("FINNHUB_API_KEY") ?: ""
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
         buildConfigField("String", "EXCHANGE_API_KEY", "\"$exchangeKey\"")
