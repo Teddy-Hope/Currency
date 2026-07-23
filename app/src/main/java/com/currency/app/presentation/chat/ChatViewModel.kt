@@ -39,7 +39,9 @@ class ChatViewModel @Inject constructor(
                 val aiResponse = getFinancialAdviceUseCase.execute(text)
                 _messages.add(ChatMessage(text = aiResponse, isUser = false))
             } catch (e: Exception) {
-                _messages.add(ChatMessage(text = "Error: ${e.localizedMessage ?: "Something went wrong"}", isUser = false))
+                // 🔍 ትክክለኛውን የዲባግ ኤረር ከነ ሙሉ ዝርዝሩ እዚህ እናሳያለን
+                val errorDetails = "AI Error Debug -> Type: ${e.javaClass.simpleName}, Msg: ${e.localizedMessage ?: e.toString()}"
+                _messages.add(ChatMessage(text = errorDetails, isUser = false))
             } finally {
                 _isLoading.value = false
             }
