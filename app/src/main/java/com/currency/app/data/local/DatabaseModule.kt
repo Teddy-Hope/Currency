@@ -2,13 +2,11 @@ package com.currency.app.data.local
 
 import android.content.Context
 import androidx.room.Room
-import com.currency.app.BuildConfig
 import com.currency.app.data.remote.CryptoApiService
 import com.currency.app.data.remote.CurrencyApiService
 import com.currency.app.data.remote.StockApiService
 import com.currency.app.data.repository.FinancialRepositoryImpl
 import com.currency.app.domain.repository.FinancialRepository
-import com.google.ai.client.generativeai.GenerativeModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,14 +48,5 @@ object DatabaseModule {
         currencyApi: CurrencyApiService
     ): FinancialRepository {
         return FinancialRepositoryImpl(cryptoApi, stockApi, currencyApi)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGenerativeModel(): GenerativeModel {
-        return GenerativeModel(
-            modelName = "gemini-1.5-flash",
-            apiKey = BuildConfig.GEMINI_API_KEY
-        )
     }
 }

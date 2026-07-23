@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +29,10 @@ fun ChatScreen(
                 title = { Text("Financial AI Assistant") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
@@ -42,7 +45,7 @@ fun ChatScreen(
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f) // እዚህ ጋር ከ 1fr ወደ 1f ተቀይሯል
+                    .weight(1f)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -73,7 +76,7 @@ fun ChatScreen(
                     value = textState,
                     onValueChange = { textState = it },
                     placeholder = { Text("Ask about Stocks, Crypto or ETB rates...") },
-                    modifier = Modifier.weight(1f), // እዚህ ጋርም ወደ 1f ተስተካክሏል
+                    modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
