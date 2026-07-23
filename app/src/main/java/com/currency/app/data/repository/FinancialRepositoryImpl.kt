@@ -34,7 +34,6 @@ class FinancialRepositoryImpl @Inject constructor(
             }
             emit(mapped)
         } catch (e: Exception) {
-            // 🔍 ክሪፕቶ ላይ ኤረር ሲኖር በቀጥታ ስክሪኑ ላይ እንዲታይ
             emit(
                 listOf(
                     CryptoItem(
@@ -51,7 +50,7 @@ class FinancialRepositoryImpl @Inject constructor(
         }
     }
 
-    // 🌍 Live Exchange Rates (ችግሩን በስክሪኑ ላይ በቀጥታ የሚያሳይ)
+    // 🌍 Live Exchange Rates
     override fun getLiveExchangeRates(): Flow<List<CurrencyItem>> = flow {
         val finalCurrencies = mutableListOf<CurrencyItem>()
 
@@ -59,7 +58,6 @@ class FinancialRepositoryImpl @Inject constructor(
             val response = currencyApi.getLiveExchangeRates()
             val serverRates = response.conversion_rates
 
-            // ሰርቨሩ ሲሰራ ትክክለኛውን ዳታ ይሞላል
             val worldCurrencies = listOf(
                 "USD" to ("US Dollar" to 124.50), 
                 "EUR" to ("Euro (Europe)" to 134.20), 
@@ -73,18 +71,19 @@ class FinancialRepositoryImpl @Inject constructor(
                 } else {
                     data.second
                 }
+                // 🔍 ትክክለኛዎቹን ፊልዶች buyPrice እና sellPrice በመጠቀም
                 finalCurrencies.add(CurrencyItem(data.first, code, livePrice, livePrice * 1.02, "https://flagcdn.com/w40/${code.take(2).lowercase()}.png"))
             }
 
         } catch (e: Exception) {
-            // 🔍 ሪል ችግሩን (ለምሳሌ 401, 429 ወይም ኔትወርክ) በቀጥታ በስክሪኑ ላይ ከረንሲ ስም ቦታ እንዲያሳየው እናደርጋለን
             val errorMsg = "${e.javaClass.simpleName}: ${e.localizedMessage ?: "Connection failed"}"
+            // 🔍 እዚህም በትክክለኛው የ Model ስም ተስተካክሏል
             finalCurrencies.add(
                 CurrencyItem(
                     bankName = "⚠️ Currency Error: $errorMsg",
                     bankCode = "ERR",
-                    buyRate = 0.0,
-                    sellRate = 0.0,
+                    buyPrice = 0.0,
+                    sellPrice = 0.0,
                     flagUrl = ""
                 )
             )
@@ -93,12 +92,11 @@ class FinancialRepositoryImpl @Inject constructor(
         emit(finalCurrencies)
     }
 
-    // 📈 Top Stocks (ችግሩን በስክሪኑ ላይ በቀጥታ የሚያሳይ)
+    // 📈 Top Stocks
     override fun getTopStocks(): Flow<List<StockItem>> = flow {
         val finalStocks = mutableListOf<StockItem>()
         
         try {
-            // የመጀመሪያውን ስቶክ ብቻ በመሞከር ኤረር ካለ በቀጥታ እንይበታለን
             val quote = stockApi.getStockQuote("AAPL")
             val actualPrice = if (quote.c > 0.0) quote.c else 315.41
             
@@ -113,7 +111,6 @@ class FinancialRepositoryImpl @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            // 🔍 ስቶክ ላይ ኤረር ሲኖር (ለምሳሌ 429 Too Many Requests) በቀጥታ ስክሪኑ ላይ ይጽፈዋል
             val errorMsg = "${e.javaClass.simpleName}: ${e.localizedMessage ?: "API Limit/Error"}"
             finalStocks.add(
                 StockItem(
