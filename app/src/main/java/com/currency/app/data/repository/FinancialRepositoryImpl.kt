@@ -1,6 +1,5 @@
 package com.currency.app.data.repository
 
-import android.util.Log
 import com.currency.app.data.remote.CryptoApiService
 import com.currency.app.data.remote.StockApiService
 import com.currency.app.data.remote.CurrencyApiService
@@ -17,10 +16,6 @@ class FinancialRepositoryImpl @Inject constructor(
     private val stockApi: StockApiService,
     private val currencyApi: CurrencyApiService
 ) : FinancialRepository {
-
-    companion object {
-        private const val TAG = "FinancialRepoDebug"
-    }
 
     // 🪙 Crypto Markets
     override fun getCryptoMarkets(): Flow<List<CryptoItem>> = flow {
@@ -39,102 +34,95 @@ class FinancialRepositoryImpl @Inject constructor(
             }
             emit(mapped)
         } catch (e: Exception) {
-            Log.e(TAG, "Crypto API Error: ${e.localizedMessage}", e)
-            emit(emptyList())
+            // 🔍 ክሪፕቶ ላይ ኤረር ሲኖር በቀጥታ ስክሪኑ ላይ እንዲታይ
+            emit(
+                listOf(
+                    CryptoItem(
+                        id = "error",
+                        name = "Crypto Error: ${e.javaClass.simpleName} - ${e.localizedMessage ?: "Unknown"}...",
+                        symbol = "ERR",
+                        currentPrice = 0.0,
+                        priceChangePercentage24h = 0.0,
+                        sparklineData = emptyList(),
+                        iconUrl = ""
+                    )
+                )
+            )
         }
     }
 
-    // 🌍 Live Exchange Rates (ከ ExchangeRate API ትክክለኛውን ኤረር ማሳያ)
+    // 🌍 Live Exchange Rates (ችግሩን በስክሪኑ ላይ በቀጥታ የሚያሳይ)
     override fun getLiveExchangeRates(): Flow<List<CurrencyItem>> = flow {
         val finalCurrencies = mutableListOf<CurrencyItem>()
-        
-        finalCurrencies.add(CurrencyItem("Commercial Bank of Ethiopia", "CBE", 123.50, 125.90, "https://flagcdn.com/w40/et.png"))
-        finalCurrencies.add(CurrencyItem("Awash International Bank", "AWASH", 124.10, 126.50, "https://flagcdn.com/w40/et.png"))
-        finalCurrencies.add(CurrencyItem("Dashen Bank", "DASHEN", 123.80, 126.20, "https://flagcdn.com/w40/et.png"))
-        finalCurrencies.add(CurrencyItem("Abyssinia Bank", "BOA", 124.00, 126.40, "https://flagcdn.com/w40/et.png"))
-        finalCurrencies.add(CurrencyItem("Hibret Bank", "HIBRET", 123.75, 126.15, "https://flagcdn.com/w40/et.png"))
 
-        val worldCurrencies = listOf(
-            "USD" to ("US Dollar" to 124.50), 
-            "EUR" to ("Euro (Europe)" to 134.20), 
-            "GBP" to ("British Pound" to 158.40),
-            "KES" to ("Kenyan Shilling" to 0.96), 
-            "ZAR" to ("South African Rand" to 6.82), 
-            "EGP" to ("Egyptian Pound" to 2.58),
-            "AED" to ("UAE Dirham" to 33.90), 
-            "SAR" to ("Saudi Riyal" to 33.20), 
-            "INR" to ("Indian Rupee" to 1.49),
-            "CNY" to ("Chinese Yuan" to 17.18), 
-            "JPY" to ("Japanese Yen" to 0.78), 
-            "CAD" to ("Canadian Dollar" to 91.40)
-        )
-
-        var serverRates: Map<String, Double>? = null
         try {
             val response = currencyApi.getLiveExchangeRates()
-            serverRates = response.conversion_rates
-            Log.e(TAG, "Currency API Success! Rates received: ${serverRates.size}")
-        } catch (e: Exception) {
-            // 🔍 እዚህ ጋር የ Currency ኤረሩ በግልጽ ይታተማል (ለምሳሌ 401 Unauthorized ከሆነ)
-            Log.e(TAG, "❌ CURRENCY API CRASH: ${e.javaClass.simpleName} - ${e.localizedMessage}", e)
-            serverRates = null
-        }
+            val serverRates = response.conversion_rates
 
-        worldCurrencies.forEach { (code, data) ->
-            val serverRate = serverRates?.get(code)
-            val livePrice = if (serverRate != null && serverRate > 0.0) {
-                (serverRates["ETB"] ?: 124.50) / serverRate
-            } else {
-                data.second
-            }
-            if (finalCurrencies.none { it.bankCode == code } && finalCurrencies.size < 40) {
+            // ሰርቨሩ ሲሰራ ትክክለኛውን ዳታ ይሞላል
+            val worldCurrencies = listOf(
+                "USD" to ("US Dollar" to 124.50), 
+                "EUR" to ("Euro (Europe)" to 134.20), 
+                "GBP" to ("British Pound" to 158.40)
+            )
+            
+            worldCurrencies.forEach { (code, data) ->
+                val serverRate = serverRates[code]
+                val livePrice = if (serverRate != null && serverRate > 0.0) {
+                    (serverRates["ETB"] ?: 124.50) / serverRate
+                } else {
+                    data.second
+                }
                 finalCurrencies.add(CurrencyItem(data.first, code, livePrice, livePrice * 1.02, "https://flagcdn.com/w40/${code.take(2).lowercase()}.png"))
             }
+
+        } catch (e: Exception) {
+            // 🔍 ሪል ችግሩን (ለምሳሌ 401, 429 ወይም ኔትወርክ) በቀጥታ በስክሪኑ ላይ ከረንሲ ስም ቦታ እንዲያሳየው እናደርጋለን
+            val errorMsg = "${e.javaClass.simpleName}: ${e.localizedMessage ?: "Connection failed"}"
+            finalCurrencies.add(
+                CurrencyItem(
+                    bankName = "⚠️ Currency Error: $errorMsg",
+                    bankCode = "ERR",
+                    buyRate = 0.0,
+                    sellRate = 0.0,
+                    flagUrl = ""
+                )
+            )
         }
 
         emit(finalCurrencies)
     }
 
-    // 📈 Top Stocks (ከ Finnhub API ትክክለኛውን ኤረር ማሳያ)
+    // 📈 Top Stocks (ችግሩን በስክሪኑ ላይ በቀጥታ የሚያሳይ)
     override fun getTopStocks(): Flow<List<StockItem>> = flow {
         val finalStocks = mutableListOf<StockItem>()
         
-        val eliteCompanies = listOf(
-            "AAPL" to ("Apple Inc." to 315.41),
-            "MSFT" to ("Microsoft Corp." to 442.10),
-            "GOOGL" to ("Alphabet Inc." to 178.50),
-            "AMZN" to ("Amazon Inc." to 189.20),
-            "NVDA" to ("NVIDIA Corporation" to 925.00),
-            "TSLA" to ("Tesla Inc." to 175.80),
-            "META" to ("Meta Platforms" to 495.30),
-            "NFLX" to ("Netflix Inc." to 610.40)
-        )
-
-        eliteCompanies.forEach { (sym, data) ->
-            var actualPrice = data.second
-            var actualChange = 1.25
-            try {
-                val quote = stockApi.getStockQuote(sym)
-                if (quote.c > 0.0) {
-                    actualPrice = quote.c
-                    actualChange = quote.dp
-                    Log.e(TAG, "Stock API Success for $sym: price = $actualPrice")
-                }
-            } catch (e: Exception) {
-                // 🔍 እዚህ ጋር የ Stock ኤረሩ በግልጽ ይታተማል (ለምሳሌ 429 Too Many Requests ከሆነ)
-                Log.e(TAG, "❌ STOCK API CRASH for $sym: ${e.javaClass.simpleName} - ${e.localizedMessage}", e)
-                actualPrice = data.second
-                actualChange = 0.5
-            }
-
+        try {
+            // የመጀመሪያውን ስቶክ ብቻ በመሞከር ኤረር ካለ በቀጥታ እንይበታለን
+            val quote = stockApi.getStockQuote("AAPL")
+            val actualPrice = if (quote.c > 0.0) quote.c else 315.41
+            
             finalStocks.add(
                 StockItem(
-                    symbol = sym,
-                    name = data.first,
+                    symbol = "AAPL",
+                    name = "Apple Inc. (Live OK)",
                     price = actualPrice,
-                    changePercent = actualChange,
-                    sparklineData = listOf(actualPrice.toFloat() * 0.99f, actualPrice.toFloat() * 1.01f, actualPrice.toFloat()),
-                    imageUrl = "https://www.google.com/s2/favicons?sz=128&domain=${data.first.split(" ")[0].lowercase()}.com"
+                    changePercent = quote.dp,
+                    sparklineData = listOf(actualPrice.toFloat()),
+                    imageUrl = ""
+                )
+            )
+        } catch (e: Exception) {
+            // 🔍 ስቶክ ላይ ኤረር ሲኖር (ለምሳሌ 429 Too Many Requests) በቀጥታ ስክሪኑ ላይ ይጽፈዋል
+            val errorMsg = "${e.javaClass.simpleName}: ${e.localizedMessage ?: "API Limit/Error"}"
+            finalStocks.add(
+                StockItem(
+                    symbol = "ERR",
+                    name = "⚠️ Stock Error: $errorMsg",
+                    price = 0.0,
+                    changePercent = 0.0,
+                    sparklineData = emptyList(),
+                    imageUrl = ""
                 )
             )
         }
