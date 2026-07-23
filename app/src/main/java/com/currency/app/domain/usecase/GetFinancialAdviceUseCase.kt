@@ -23,7 +23,7 @@ class GetFinancialAdviceUseCase @Inject constructor(
             response.text ?: "Empty response received from AI model."
         } catch (e: Exception) {
             e.printStackTrace()
-            // 🔍 ኤረሩን ሳንደብቅ በትክክል እንዲያሳየን እዚህ ጋር እናወጣዋለን
+            // 🔍 
             "AI_CRASH_DEBUG -> [${e.javaClass.simpleName}]: ${e.localizedMessage ?: e.toString()}"
         }
     }
