@@ -24,6 +24,12 @@ jobs:
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
 
+    - name: Create local.properties from Secrets
+      run: |
+        echo "FINNHUB_API_KEY=${{ secrets.FINNHUB_API_KEY }}" >> local.properties
+        echo "EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}" >> local.properties
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> local.properties
+
     - name: Build with Gradle (Assemble Debug APK)
       run: ./gradlew assembleDebug
 
